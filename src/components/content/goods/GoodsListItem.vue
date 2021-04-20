@@ -22,6 +22,7 @@ export default {
   },
   methods: {
     goodsLoad() {
+      // 发送事件
       this.$bus.$emit('itemImageLoad')
     }
   },
