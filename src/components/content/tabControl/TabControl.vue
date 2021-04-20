@@ -15,7 +15,7 @@
     name:'TabControl',
     props:{
       titles:{
-        type:Array,
+        type: Array,
         default() {
           return []
         }
@@ -29,6 +29,7 @@
     methods:{
       tabClick(index) {
         this.currentIndex = index
+        this.$emit("tabClick", index)
       }
     }
   }

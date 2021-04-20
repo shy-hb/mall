@@ -14,7 +14,7 @@ import GoodsListItem from "./GoodsListItem"
     },
     props:{
       goodsList:{
-        type:Array,
+        type: Array,
         default() {
           return []
         }
