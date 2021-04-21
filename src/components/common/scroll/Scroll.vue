@@ -51,6 +51,9 @@
       },
       refresh() {
         this.scroll && this.scroll.refresh();
+      },
+      getscrollY() {
+        return this.scroll ? this.scroll.y : 0
       }
     }
   }

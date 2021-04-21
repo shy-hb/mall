@@ -71,7 +71,16 @@ export default {
       isShow: false,
       tabBarOffsetTop: 0,
       tabBarArrive: false,
+      saveY: 0
     };
+  },
+  activated() {
+    this.$refs.scroll.scrollTop(0, this.saveY, 0);
+    this.$refs.scroll.refresh();
+  },
+  deactivated() {
+    // console.log(this.$refs.scroll.getscrollY());
+    this.saveY = this.$refs.scroll.getscrollY()
   },
   created() {
     // 网络请求数据
