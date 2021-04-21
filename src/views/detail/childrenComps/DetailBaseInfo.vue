@@ -32,9 +32,6 @@
         }
       }
     },
-    created() {
-      console.log(this.Goods);
-    },
 	}
 </script>
 
