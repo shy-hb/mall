@@ -39,10 +39,9 @@ import GoodsList from "components/content/goods/GoodsList";
 import NavBar from "components/common/navbar/NavBar";
 import TabControl from "components/content/tabControl/TabControl";
 import Scroll from "components/common/scroll/Scroll";
-import BackTop from "components/content/backTop/BackTop";
 
 import { getHomeMultidata, getHomeGoods } from "network/home.js";
-import { debounce } from "common/utils.js";
+import { itmeListenerMinin, backTopMixin } from "common/mixin.js"
 export default {
   name: "Home",
   components: {
@@ -53,8 +52,8 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop,
   },
+  mixins: [itmeListenerMinin, backTopMixin],
   data() {
     return {
       // 存放banners数据
@@ -68,10 +67,10 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
-      isShow: false,
       tabBarOffsetTop: 0,
       tabBarArrive: false,
-      saveY: 0
+      saveY: 0,
+      itemImgListener: null
     };
   },
   activated() {
@@ -80,7 +79,10 @@ export default {
   },
   deactivated() {
     // console.log(this.$refs.scroll.getscrollY());
+    // 记录y值
     this.saveY = this.$refs.scroll.getscrollY()
+    // 取消刷新
+    // this.$bus.$off("itemImageLoad", this.itemImgListener)
   },
   created() {
     // 网络请求数据
@@ -90,12 +92,7 @@ export default {
     this.getHomeGoods("sell");
   },
   mounted() {
-    // 监听图片加载完成
-    const refresh = debounce(this.$refs.scroll.refresh, 30);
-    this.$bus.$on("itemImageLoad", () => {
-      // 图片加载完成以后就refresh一下
-      refresh();
-    });
+    
   },
   computed: {
     showGoods() {
@@ -120,9 +117,6 @@ export default {
       this.isShow = Math.abs(position.y) > 1000;
       // 判断tabBar-control是否达到高度
       this.tabBarArrive = Math.abs(position.y) >= this.tabBarOffsetTop;
-    },
-    backClick() {
-      this.$refs.scroll.scrollTop(0, -1, 500);
     },
     tabClick(index) {
       switch (index) {
