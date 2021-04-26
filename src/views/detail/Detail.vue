@@ -1,6 +1,11 @@
 <template>
   <div id="detail">
-    <nav-bar-item class="detail-nav" @itemClick="itemClick" ref="navbar"></nav-bar-item>
+    <toast :show="show" :message="message" />
+    <nav-bar-item
+      class="detail-nav"
+      @itemClick="itemClick"
+      ref="navbar"
+    ></nav-bar-item>
     <scroll
       class="content"
       ref="scroll"
@@ -24,8 +29,9 @@
       ></detail-comment-info>
       <goods-list ref="recommend" :goodsList="recommendList"></goods-list>
     </scroll>
-    <detail-bottom-bar></detail-bottom-bar>
+    <detail-bottom-bar @cartClick="cartToClick"></detail-bottom-bar>
     <back-top @click.native="backClick" v-show="isShow"></back-top>
+    
   </div>
 </template>
 
@@ -37,14 +43,17 @@ import DetailShopInfo from "./childrenComps/DetailShopInfo";
 import DetailGoodsInfo from "./childrenComps/DetailGoodsInfo";
 import DetailParamInfo from "./childrenComps/DetailParamInfo";
 import DetailCommentInfo from "./childrenComps/DetailCommentInfo";
-import DetailBottomBar from "./childrenComps/DetailBottomBar"
+import DetailBottomBar from "./childrenComps/DetailBottomBar";
 
 import Scroll from "components/common/scroll/Scroll";
 import GoodsList from "components/content/goods/GoodsList";
 
-
 import { debounce } from "common/utils.js";
 import { itmeListenerMinin, backTopMixin } from "common/mixin.js";
+
+import { mapActions } from "vuex"
+
+import Toast from "components/common/toast/Toast"
 
 import {
   getDetailImage,
@@ -66,6 +75,7 @@ export default {
     DetailCommentInfo,
     GoodsList,
     DetailBottomBar,
+    Toast
   },
   data() {
     return {
@@ -81,6 +91,8 @@ export default {
       detailOffset: [],
       finalOffset: null,
       currentIndex: 0,
+      message: '',
+      show: false
     };
   },
   mixins: [itmeListenerMinin, backTopMixin],
@@ -123,11 +135,14 @@ export default {
       this.detailOffset.push(this.$refs.params.$el.offsetTop);
       this.detailOffset.push(this.$refs.comment.$el.offsetTop);
       this.detailOffset.push(this.$refs.recommend.$el.offsetTop);
-      this.detailOffset.push(Number.MAX_VALUE)
+      this.detailOffset.push(Number.MAX_VALUE);
       // console.log(this.detailOffset);
     }, 100);
   },
   methods: {
+    ...mapActions([
+      'addCart'
+    ]),
     imageLoad() {
       this.$refs.scroll.refresh();
       this.finalOffset();
@@ -138,20 +153,46 @@ export default {
     // 监听滚动
     contentScroll(position) {
       const positionY = -position.y;
-      let length = this.detailOffset.length
+      let length = this.detailOffset.length;
       for (let i = 0; i < length - 1; i++) {
-        if (this.currentIndex !== i && (i < length - 1 && positionY > this.detailOffset[i] && positionY < this.detailOffset[i + 1])) {
+        if (
+          this.currentIndex !== i &&
+          i < length - 1 &&
+          positionY > this.detailOffset[i] &&
+          positionY < this.detailOffset[i + 1]
+        ) {
           this.currentIndex = i;
-          this.$refs.navbar.currentIndex = i
+          this.$refs.navbar.currentIndex = i;
         }
       }
       // console.log(positionY);
       this.isShow = Math.abs(position.y) > 1000;
     },
-    
+    // 加入购物车
+    cartToClick() {
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.price = this.goods.realPrice;
+      product.iid = this.iid;
+      // console.log(product);
+      this.addCart(product).then(res => {
+        this.message = res;
+        this.show = true
+        setTimeout(() => {
+          this.show = false;
+          this.message = ''
+        }, 1500)
+        console.log(res);
+      })
+      // this.$store.dispatch("addCart", product).then(res => {
+      //   console.log(res);
+      // })
+      // 显示商品加入
+
+    },
   },
-  mounted() {},
-  updated() {},
 };
 </script>
 
